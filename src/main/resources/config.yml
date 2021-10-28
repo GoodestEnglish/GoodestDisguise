@@ -1,0 +1,34 @@
+MONGO:
+  HOST: "panel.relight.today:19493"
+  DATABASE: "disguise"
+  AUTHENTICATION:
+    ENABLED: false
+    USERNAME: ""
+    PASSWORD: ""
+    DATABASE: "disguise"
+RANK:
+  DEFAULT:
+    NAME: "預設職階"
+    COLOR: "A0A0A0"
+    DISPLAY: "&7"
+  VIP:
+    NAME: "VIP"
+    COLOR: "00FF00"
+    DISPLAY: "&a[VIP] "
+  MVP:
+    NAME: "MVP"
+    COLOR: "00FFFF"
+    DISPLAY: "&b[MVP] "
+  YOUTUBE:
+    NAME: "YOUTUBE"
+    COLOR: "FF9361"
+    DISPLAY: "&c[&fYOUTUBE&c] "
+  SUPPORTER:
+    NAME: "贊助者"
+    COLOR: "D400FF"
+    DISPLAY: "&d[贊助者] "
+  ADMIN:
+    NAME: "管理員"
+    COLOR: "FF6161"
+    DISPLAY: "&c[管理員] "
+CHAT_FORMAT: "<rank><name>&r&f: <message>"
