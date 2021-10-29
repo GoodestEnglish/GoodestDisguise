@@ -1,5 +1,6 @@
 package me.GoodestEnglish.disguise.command;
 
+import me.GoodestEnglish.disguise.cache.NickCache;
 import me.GoodestEnglish.disguise.menu.SelectRankMenu;
 import me.GoodestEnglish.disguise.util.GoodestCommand;
 import me.GoodestEnglish.disguise.util.Permission;
@@ -18,7 +19,9 @@ public class DisguiseCommand extends GoodestCommand {
         Player player = (Player) commandSender;
 
         if (args.length != 1) {
-            new SelectRankMenu().openMenu(player);
+            new SelectRankMenu(NickCache.getRandomNick()).openMenu(player);
+        } else {
+            new SelectRankMenu(args[0]).openMenu(player);
         }
     }
 

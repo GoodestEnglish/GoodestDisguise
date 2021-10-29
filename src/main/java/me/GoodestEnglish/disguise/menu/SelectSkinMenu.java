@@ -1,5 +1,8 @@
 package me.GoodestEnglish.disguise.menu;
 
+import lombok.RequiredArgsConstructor;
+import me.GoodestEnglish.disguise.GoodestDisguise;
+import me.GoodestEnglish.disguise.cache.RankCache;
 import me.GoodestEnglish.disguise.cache.SkinCache;
 import me.GoodestEnglish.disguise.util.CC;
 import me.GoodestEnglish.disguise.util.ItemBuilder;
@@ -17,8 +20,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SelectSkinMenu extends PaginatedMenu {
-    public SelectSkinMenu(Menu backMenu) {
+    private final String disguiseUsername;
+    private final RankCache rankCache;
+    public SelectSkinMenu(Menu backMenu, String disguiseUsername, RankCache rankCache) {
         super(backMenu);
+        this.disguiseUsername = disguiseUsername;
+        this.rankCache = rankCache;
     }
 
     @Override
@@ -30,8 +37,8 @@ public class SelectSkinMenu extends PaginatedMenu {
     public Map<Integer, Button> getAllPagesButtons(Player player) {
         final Map<Integer, Button> buttons = new HashMap<>();
 
-        for (SkinCache cache : SkinCache.getSkinCaches()) {
-            String texture = cache.getValue();
+        for (SkinCache skinCache : SkinCache.getSkinCaches()) {
+            String texture = skinCache.getValue();
             ItemStack head = new ItemBuilder(Material.SKULL_ITEM)
                     .durability(3)
                     .build();
@@ -42,8 +49,8 @@ public class SelectSkinMenu extends PaginatedMenu {
                 @Override
                 public ItemStack getButtonItem(Player player) {
                     return new ItemBuilder(head)
-                            .name("&e&l" + cache.getName())
-                            .lore(cache.getLore())
+                            .name("&e&l" + skinCache.getName())
+                            .lore(skinCache.getLore())
                             .addLoreLine("")
                             .addLoreLine("&e&n點擊更改暱稱皮膚")
                             .build();
@@ -51,7 +58,8 @@ public class SelectSkinMenu extends PaginatedMenu {
 
                 @Override
                 public void clicked(Player player, int slot, ClickType clickType, int hotbarButton) {
-
+                    player.closeInventory();
+                    GoodestDisguise.INSTANCE.getDisguiseManager().disguise(player, disguiseUsername, rankCache, skinCache);
                 }
             });
         }

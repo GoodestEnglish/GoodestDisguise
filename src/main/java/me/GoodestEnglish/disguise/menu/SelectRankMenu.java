@@ -1,6 +1,7 @@
 package me.GoodestEnglish.disguise.menu;
 
 import me.GoodestEnglish.disguise.GoodestDisguise;
+import me.GoodestEnglish.disguise.cache.RankCache;
 import me.GoodestEnglish.disguise.util.BasicConfigFile;
 import me.GoodestEnglish.disguise.util.CC;
 import me.GoodestEnglish.disguise.util.ItemBuilder;
@@ -17,8 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SelectRankMenu extends PaginatedMenu {
-    public SelectRankMenu() {
+    private final String disguiseUsername;
+    public SelectRankMenu(String disguiseUsername) {
         super(null);
+        this.disguiseUsername = disguiseUsername;
     }
 
     @Override
@@ -30,18 +33,13 @@ public class SelectRankMenu extends PaginatedMenu {
     public Map<Integer, Button> getAllPagesButtons(Player player) {
         final Map<Integer, Button> buttons = new HashMap<>();
 
-        BasicConfigFile configFile = GoodestDisguise.INSTANCE.getConfigFile();
-        for (String key : configFile.getConfiguration().getConfigurationSection("RANK").getKeys(false)) {
-            String name = configFile.getString("RANK." + key + ".NAME");
-            String color = configFile.getString("RANK." + key + ".COLOR");
-            String display = configFile.getString("RANK." + key + ".DISPLAY");
-
+        for (RankCache cache : RankCache.getRankCaches()) {
             buttons.put(buttons.size(), new Button() {
                 @Override
                 public ItemStack getButtonItem(Player player) {
                     return new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                            .setLeatherArmorColor(Color.fromRGB(Integer.parseInt(color, 16)))
-                            .name("&c" + name)
+                            .setLeatherArmorColor(Color.fromRGB(Integer.parseInt(cache.getColor(), 16)))
+                            .name("&c" + cache.getName())
                             .lore(
                                     "",
                                     "&7暱稱職階只是作為顯示用途",
@@ -49,7 +47,7 @@ public class SelectRankMenu extends PaginatedMenu {
                                     "",
                                     "&7聊天預覽:",
                                     GoodestDisguise.INSTANCE.getConfigFile().getString("CHAT_FORMAT")
-                                            .replaceAll("<rank>", display)
+                                            .replaceAll("<rank>", cache.getDisplay())
                                             .replaceAll("<name>", player.getName())
                                             .replaceAll("<message>", "這是聊天預覽, 可以讓你預覽使用這個職階之後的聊天格式"),
                                     "",
@@ -59,7 +57,7 @@ public class SelectRankMenu extends PaginatedMenu {
                 }
                 @Override
                 public void clicked(final Player player, final int slot, final ClickType clickType, final int hotbarButton) {
-                    new SelectSkinMenu(SelectRankMenu.this).openMenu(player);
+                    new SelectSkinMenu(SelectRankMenu.this, disguiseUsername, cache).openMenu(player);
                 }
             });
         }
