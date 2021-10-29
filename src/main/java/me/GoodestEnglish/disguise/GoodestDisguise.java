@@ -8,6 +8,7 @@ import me.GoodestEnglish.disguise.command.CacheSkinCommand;
 import me.GoodestEnglish.disguise.command.DisguiseCommand;
 import me.GoodestEnglish.disguise.command.UndisguiseCommand;
 import me.GoodestEnglish.disguise.database.MongoDB;
+import me.GoodestEnglish.disguise.listener.DisguiseListener;
 import me.GoodestEnglish.disguise.manager.DisguiseManager;
 import me.GoodestEnglish.disguise.util.BasicConfigFile;
 import me.GoodestEnglish.disguise.util.GoodestCommand;
@@ -17,13 +18,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class GoodestDisguise extends JavaPlugin {
 
     public static GoodestDisguise INSTANCE;
-    @Getter private MongoDB mongoDB;
 
     @Getter private BasicConfigFile configFile;
     @Getter private BasicConfigFile skinDataFile;
     @Getter private BasicConfigFile rankDataFile;
     @Getter private BasicConfigFile nickDataFile;
 
+    @Getter private MongoDB mongoDB;
     @Getter private DisguiseManager disguiseManager;
 
     @Override
@@ -36,6 +37,7 @@ public class GoodestDisguise extends JavaPlugin {
         rankDataFile = new BasicConfigFile(this, "rankdata.yml");
         nickDataFile = new BasicConfigFile(this, "nickdata.yml");
 
+        mongoDB = new MongoDB();
         disguiseManager = new DisguiseManager();
 
         Menu.init();
@@ -46,5 +48,7 @@ public class GoodestDisguise extends JavaPlugin {
         new DisguiseCommand();
         new UndisguiseCommand();
         new CacheSkinCommand();
+
+        getServer().getPluginManager().registerEvents(new DisguiseListener(), this);
     }
 }

@@ -52,6 +52,7 @@ public class MongoDB {
             mongoDatabase = mongoClient.getDatabase(GoodestDisguise.INSTANCE.getConfigFile().getString("MONGO.DATABASE"));
             statsCollection = mongoDatabase.getCollection("data");
         } catch (Exception e) {
+            e.printStackTrace();
             Log.show(Log.LogLevel.EXTREME,"無法連接到 MongoDB");
         }
     }

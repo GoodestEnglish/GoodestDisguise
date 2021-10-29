@@ -59,7 +59,7 @@ public class SelectSkinMenu extends PaginatedMenu {
                 @Override
                 public void clicked(Player player, int slot, ClickType clickType, int hotbarButton) {
                     player.closeInventory();
-                    GoodestDisguise.INSTANCE.getDisguiseManager().disguise(player, disguiseUsername, rankCache, skinCache);
+                    GoodestDisguise.INSTANCE.getDisguiseManager().disguise(player, disguiseUsername, rankCache, skinCache, false);
                 }
             });
         }

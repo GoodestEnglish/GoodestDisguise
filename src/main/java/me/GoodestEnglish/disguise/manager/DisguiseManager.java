@@ -8,6 +8,7 @@ import me.GoodestEnglish.disguise.GoodestDisguise;
 import me.GoodestEnglish.disguise.cache.RankCache;
 import me.GoodestEnglish.disguise.cache.SkinCache;
 import me.GoodestEnglish.disguise.profile.PlayerProfile;
+import me.GoodestEnglish.disguise.util.Common;
 import me.GoodestEnglish.disguise.util.PacketSender;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
@@ -25,19 +26,36 @@ import java.util.stream.Collectors;
 
 public class DisguiseManager {
 
-    public void disguise(Player player, String nick, RankCache rankCache, SkinCache skinCache) {
+    public void disguise(Player player, String nick, RankCache rankCache, SkinCache skinCache, boolean firstJoin) {
+        Common.sendMessage(player, "&e正在處理暱稱請求, 請稍作等待...");
         PlayerProfile profile = PlayerProfile.getByUuid(player.getUniqueId());
+
+        if (System.currentTimeMillis() < profile.getLastDisguiseTime() + 60*1000) {
+            Common.sendMessage(player, "&c抱歉, 每次暱稱需要等待60秒才能再使用一次");
+            return;
+        }
+
         profile.setDisguised(true);
         profile.setDisguiseUsername(nick);
         profile.setDisguiseRank(rankCache);
         profile.setDisguiseSkin(skinCache);
+        if (!firstJoin) {
+            profile.setLastDisguiseTime(System.currentTimeMillis());
+        }
 
-        GameProfile gameProfile = new GameProfile(player.getUniqueId(), nick);
-        gameProfile.getProperties().removeAll("textures");
-        gameProfile.getProperties().put("textures", new Property("textures", skinCache.getValue(), skinCache.getSignature()));
+        profile.save(bool -> {
+            if (bool) {
+                GameProfile gameProfile = new GameProfile(player.getUniqueId(), nick);
+                gameProfile.getProperties().removeAll("textures");
+                gameProfile.getProperties().put("textures", new Property("textures", skinCache.getValue(), skinCache.getSignature()));
 
-        changeGameProfile(((CraftPlayer)player).getHandle(), gameProfile);
-        startDisguise(player);
+                changeGameProfile(((CraftPlayer)player).getHandle(), gameProfile);
+                reloadSkin(player, firstJoin);
+                Common.sendMessage(player, "&a成功使用暱稱! 你現在將會是 " + nick);
+            } else {
+                Common.sendMessage(player, "&c在使用暱稱時出現了錯誤, 請稍後再試");
+            }
+        });
     }
 
     public void undisguise(Player player) {
@@ -48,7 +66,8 @@ public class DisguiseManager {
         profile.setDisguiseSkin(null);
 
         changeGameProfile(((CraftPlayer)player).getHandle(), profile.getOriginalGameProfile());
-        startDisguise(player);
+        reloadSkin(player, false);
+        Common.sendMessage(player, "&a成功解除暱稱");
     }
 
     private void changeGameProfile(EntityHuman entityHuman, GameProfile gameProfile) {
@@ -62,12 +81,12 @@ public class DisguiseManager {
         }
     }
 
-    private void startDisguise(Player player) {
-        reloadSkinForSelf(player);
+    private void reloadSkin(Player player, boolean firstJoin) {
+        reloadSkinForSelf(player, firstJoin);
         reloadSkinForOther(player);
     }
 
-    public void reloadSkinForSelf(Player player) {
+    public void reloadSkinForSelf(Player player, boolean firstJoin) {
         //https://github.com/SkinsRestorer/SkinsRestorerX/blob/dev/bukkit/src/main/java/net/skinsrestorer/bukkit/skinrefresher/SpigotSkinRefresher.java
         final EntityPlayer ep = ((CraftPlayer) player).getHandle();
         final Location loc = player.getLocation().clone();
@@ -84,13 +103,16 @@ public class DisguiseManager {
             player.updateInventory();
             ep.triggerHealthUpdate();
 
-            player.teleport(loc);
+            if (!firstJoin) {
+                player.teleport(loc);
+            }
         });
     }
 
     public void reloadSkinForOther(Player player) {
         PacketSender.sendToAll(new PacketPlayOutEntityDestroy(player.getEntityId()));
         PacketSender.sendToAll(new PacketPlayOutNamedEntitySpawn(((CraftPlayer)player).getHandle()));
+
         List<Player> viewablePlayers = Bukkit.getOnlinePlayers().stream().filter(target -> target.canSee(player)).collect(Collectors.toList());
         for (Player target : viewablePlayers) {
             target.hidePlayer(player);

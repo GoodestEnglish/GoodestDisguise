@@ -19,7 +19,7 @@ public class RankCache {
     private final String display;
 
     public static void init() {
-        BasicConfigFile configFile = GoodestDisguise.INSTANCE.getConfigFile();
+        BasicConfigFile configFile = GoodestDisguise.INSTANCE.getRankDataFile();
         for (String key : configFile.getConfiguration().getConfigurationSection("RANK").getKeys(false)) {
             String name = configFile.getString("RANK." + key + ".NAME");
             String color = configFile.getString("RANK." + key + ".COLOR");
