@@ -67,6 +67,7 @@ public class DisguiseManager {
 
         changeGameProfile(((CraftPlayer)player).getHandle(), profile.getOriginalGameProfile());
         reloadSkin(player, false);
+        GoodestDisguise.INSTANCE.getMongoDB().removePlayerData(player.getUniqueId());
         Common.sendMessage(player, "&a成功解除暱稱");
     }
 
